@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import personService from '../services/persons'
 
-export const PersonForm = ({ persons, setPersons }) => {
+export const PersonForm = ({ persons, setPersons, setError, setMessage }) => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
 
@@ -27,16 +27,33 @@ export const PersonForm = ({ persons, setPersons }) => {
         ? personService
           .update(person.id, personObject)
           .then(returnedPerson => {
+            setMessage(`Number of ${personObject.name} changed`)
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
             setPersons(persons.map(person => person.name === newName ? returnedPerson : person))
             setNewName('')
             setNewNumber('')
-          })        
+          })
+          .catch(error => {
+            setError(
+              `Information on ${person.name} has already been removed from server`
+            )
+            console.log(error);
+            setTimeout(() => {
+              setError(null)
+            }, 5000)
+          })
         : console.log("cancelled")
 
       : personService
         .create(personObject)
         .then(newPerson => {
           setPersons(persons.concat(newPerson))
+          setMessage(`Added ${personObject.name}`)
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
           setNewName('')
           setNewNumber('')
         })
